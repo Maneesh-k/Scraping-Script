@@ -1,0 +1,34 @@
+# Node build artifacts
+node_modules/
+npm-debug.log
+
+# Local development
+.env
+*.env
+*.dev
+.DS_Store
+
+# Docker
+docker-compose.yml
+package-lock.json
+automate_deploy.py
+pull_deploy.py
+push_deploy.py
+subautomate.py
+gitLogs.csv
+staging_deploy.py
+paging_deploy.py
+errors.csv
+pipedrive.csv
+
+#jest coverage files
+coverage/
+
+#redis db files
+*.rdb
+.elasticbeanstalk/config.yml
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
