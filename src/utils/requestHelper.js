@@ -1,7 +1,7 @@
 const axios = require("axios")
 
 function axiosInstanceWithRetry() {
-	const axiosInstance = axios.create({ timeout: 20000})
+	const axiosInstance = axios.create({ timeout: 20000000})
 
 	const maxRetries = 5
 

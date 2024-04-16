@@ -1,5 +1,5 @@
 const express = require("express");
-const scraping = require("./src/service/scraping")
+const {route:scraping} = require("./src/controller/scraping.controller");
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
@@ -11,12 +11,12 @@ process.on("uncaughtException", (err) => {
 
 const app = express();
 
+app.use(scraping)
+
 const port = 1111;
 
 const server = app.listen(port, async () => {
   console.log(`App running on port ${port}...`);
-
-  await scraping.start()
 });
 
 process.on("unhandledRejection", (err) => {

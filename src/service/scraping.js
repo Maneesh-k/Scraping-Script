@@ -1,36 +1,26 @@
 const { JSDOM } = require("jsdom");
 const { getRequest } = require("../utils/requestHelper");
-const { writeCSV } = require("../utils/csv");
 const Spinnies = require("spinnies");
-const start = async () => {
+
+const start = async (page) => {
   const url = "https://news.ycombinator.com/";
 
-  await writeCSV("hackerNews.csv", "Rank,Title,Website,Score,By,Age \n");
+  const [error, response] = await request(`${url}?p=${page}`);
 
-  const spinnies = new Spinnies();
+  if (error) throw new Error(error);
 
-  for (let page = 1; page !== -1; page++) {
-    spinnies.add("page", { text: `Processing page number ${page}...` });
+  const { data = "" } = response;
 
-    const [error, response] = await request(`${url}?p=${page}`);
+  const hackerNews = htmlToArray(data);
 
-    if (error) throw error;
+  const hasNextPage = nextPage(data);
 
-    const { data = "" } = response;
-
-    await htmlToCsv(data);
-
-    if (!hasNextPage(data)) {
-      spinnies.add("page", { text: `Completed total page number ${page}` });
-
-      break;
-    }
-  }
+  return { data: hackerNews, hasNextPage };
 };
 
 const request = async (url) => await getRequest(url, { retry: 5 });
 
-const hasNextPage = (htmlString) => {
+const nextPage = (htmlString) => {
   const dom = new JSDOM(htmlString);
 
   const document = dom.window.document;
@@ -51,7 +41,7 @@ const hasNextPage = (htmlString) => {
   return false;
 };
 
-const htmlToCsv = async (html) => {
+const htmlToArray = (html) => {
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
@@ -62,7 +52,13 @@ const htmlToCsv = async (html) => {
   const byElements = document.querySelectorAll("td.subtext a.hnuser");
   const ageElements = document.querySelectorAll("td.subtext span.age a");
 
+  const currentPageHackerNews = [];
+
+  const spinnies = new Spinnies();
+
   for (let index = 0; index < rankElements.length; index++) {
+    spinnies.add("news", { text: `Processing news number ${index}...` });
+
     const rank = rankElements[index]
       ? parseInt(rankElements[index].textContent)
       : null;
@@ -80,11 +76,18 @@ const htmlToCsv = async (html) => {
       ? ageElements[index].textContent.trim()
       : null;
 
-    await writeCSV(
-      "hackerNews.csv",
-      `${rank},${title},${website},${score},${by},${age}\n`
-    );
+    currentPageHackerNews.push({
+      rank,
+      title,
+      website,
+      score,
+      by,
+      age,
+    });
   }
+
+  return currentPageHackerNews;
+
 };
 
 module.exports = { start };
